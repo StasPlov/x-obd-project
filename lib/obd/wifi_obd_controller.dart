@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:x_obd_project/obd/obd_commands.dart';
+
 import 'obd_data_parser.dart';
 
 class WifiObdController {
@@ -45,7 +47,7 @@ class WifiObdController {
 	Future<void> _initializeObd() async {
 		// Инициализация OBD адаптера
 		await sendCommand('ATZ');     // Сброс
-		await Future.delayed(Duration(milliseconds: 1000));
+		await Future.delayed(const Duration(milliseconds: 1000));
 		await sendCommand('ATE0');    // Выключаем эхо
 		await sendCommand('ATL0');    // Выключаем линейные разрывы
 		await sendCommand('ATH0');    // Выключаем заголовки
@@ -55,19 +57,22 @@ class WifiObdController {
 
 	void _startPeriodicUpdates() {
 		_periodicTimer?.cancel();
-		_periodicTimer = Timer.periodic(Duration(milliseconds: 100), (timer) async {
+		_periodicTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
 			if (isConnected) {
-				await sendCommand('010C');
-				await sendCommand('010D');
-				await sendCommand('0111');
-				await sendCommand('0105');
+				await sendCommand(ObdCommands.rpm);
+				await sendCommand(ObdCommands.speed);
+				await sendCommand(ObdCommands.throttle);
+				await sendCommand(ObdCommands.coolantTemp);
+				await sendCommand(ObdCommands.engineLoad);
+				await sendCommand(ObdCommands.fuelLevel);
+				await sendCommand(ObdCommands.voltage);
 			}
 		});
 	}
 
 	Future<void> sendCommand(String command) async {
 		if (socket != null && isConnected) {
-			socket!.write(command + '\r');
+			socket!.write('$command\r');
 			await socket!.flush();
 		}
 	}
@@ -85,11 +90,17 @@ class WifiObdController {
 				parsedData['throttle'] = ObdDataParser.parseThrottle(response);
 			} else if (response.startsWith('41 05')) {
 				parsedData['temp'] = ObdDataParser.parseTemp(response);
+			} else if (response.startsWith('41 04')) {
+				parsedData['engineLoad'] = ObdDataParser.parseEngineLoad(response);
+			} else if (response.startsWith('41 2F')) {
+				parsedData['fuelLevel'] = ObdDataParser.parseFuelLevel(response);
 			}
+		} else if (response.startsWith('ATRV')) {
+			parsedData['voltage'] = ObdDataParser.parseVoltage(response);
+		}
 
-			if (parsedData.isNotEmpty) {
-				streamController.add(parsedData);
-			}
+		if (parsedData.isNotEmpty) {
+			streamController.add(parsedData);
 		}
 	}
 
@@ -101,7 +112,7 @@ class WifiObdController {
 	}
 
 	void dispose() {
-		disconnect();
-		streamController.close();
+			disconnect();
+			streamController.close();
 	}
 }

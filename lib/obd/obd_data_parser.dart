@@ -51,4 +51,40 @@ class ObdDataParser {
     }
     return null;
   }
+
+  static double? parseEngineLoad(String response) {
+    try {
+      if (response.startsWith('41 04')) {
+        var byte = response.substring(6).trim();
+        return (int.parse(byte, radix: 16) * 100) / 255;
+      }
+    } catch (e) {
+      print('Ошибка парсинга Engine Load: $e');
+    }
+    return null;
+  }
+
+  static double? parseFuelLevel(String response) {
+    try {
+      if (response.startsWith('41 2F')) {
+        var byte = response.substring(6).trim();
+        return (int.parse(byte, radix: 16) * 100) / 255;
+      }
+    } catch (e) {
+      print('Ошибка парсинга Fuel Level: $e');
+    }
+    return null;
+  }
+
+  static double? parseVoltage(String response) {
+    try {
+      if (response.startsWith('ATRV')) {
+        var voltage = response.substring(4).trim();
+        return double.parse(voltage);
+      }
+    } catch (e) {
+      print('Ошибка парсинга Voltage: $e');
+    }
+    return null;
+  }
 } 

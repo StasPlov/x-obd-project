@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import '../obd/wifi_obd_controller.dart'; // Предполагаемый путь к контроллеру
+import 'detailed_obd_screen.dart';
 
 class ObdScreen extends StatefulWidget {
+	const ObdScreen({super.key});
+
 	@override
 	_ObdScreenState createState() => _ObdScreenState();
 }
 
 class _ObdScreenState extends State<ObdScreen> {
 	final WifiObdController _obdController = WifiObdController();
-	bool isConnected = false;
-	bool isConnecting = false;
+	bool isConnected = true;
+	bool isConnecting = true;
 	Map<String, dynamic> currentData = {};
 
 	@override
@@ -38,7 +41,7 @@ class _ObdScreenState extends State<ObdScreen> {
 			setState(() {
 				isConnected = true;
 				ScaffoldMessenger.of(context).showSnackBar(
-					SnackBar(
+					const SnackBar(
 						content: Text('Успешно подключено к OBD'),
 						backgroundColor: Colors.green,
 					),
@@ -47,7 +50,7 @@ class _ObdScreenState extends State<ObdScreen> {
 		} catch (e) {
 			ScaffoldMessenger.of(context).showSnackBar(
 				SnackBar(
-					content: Text('Ошибка подключения: $e'),
+					content: Text("Ошибка подключения: $e"),
 					backgroundColor: Colors.red,
 				),
 			);
@@ -65,7 +68,7 @@ class _ObdScreenState extends State<ObdScreen> {
 			currentData.clear();
 		});
 		ScaffoldMessenger.of(context).showSnackBar(
-			SnackBar(
+			const SnackBar(
 				content: Text('Отключено от OBD'),
 				backgroundColor: Colors.orange,
 			),
@@ -74,105 +77,33 @@ class _ObdScreenState extends State<ObdScreen> {
 
 	@override
 	Widget build(BuildContext context) {
+		final colorScheme = Theme.of(context).colorScheme;
+		
 		return Scaffold(
+			backgroundColor: colorScheme.background,
 			appBar: AppBar(
-				title: Text('OBD Монитор'),
+				backgroundColor: Colors.transparent,
+				elevation: 0,
+				centerTitle: true,
+				title: const Text('OBD Монитор'),
 				actions: [
 					Padding(
-						padding: EdgeInsets.all(8.0),
-						child: Center(
-							child: Container(
-								width: 12,
-								height: 12,
-								decoration: BoxDecoration(
-									shape: BoxShape.circle,
-									color: isConnected ? Colors.green : Colors.red,
-								),
-							),
-						),
+						padding: const EdgeInsets.all(8.0),
+						child: _buildConnectionIndicator(),
 					),
 				],
 			),
-			body: Column(
-				children: [
-					Container(
-						padding: EdgeInsets.all(16),
-						color: Colors.grey[200],
-						child: Row(
-							children: [
-								Expanded(
-									child: Text(
-										isConnected 
-											? 'Подключено к OBD'
-											: 'Не подключено',
-										style: TextStyle(
-											fontSize: 16,
-											fontWeight: FontWeight.bold,
-										),
-									),
-								),
-								ElevatedButton.icon(
-									onPressed: isConnecting 
-										? null 
-										: (isConnected ? _disconnectFromObd : _connectToObd),
-									icon: Icon(
-										isConnected ? Icons.link_off : Icons.link,
-									),
-									label: Text(
-										isConnecting
-											? 'Подключение...'
-											: (isConnected ? 'Отключить' : 'Подключить'),
-									),
-									style: ElevatedButton.styleFrom(
-										backgroundColor: isConnected ? Colors.red : Colors.blue,
-									),
-								),
-							],
-						),
-					),
-					
-					Expanded(
-						child: isConnected ? ListView(
-							padding: EdgeInsets.all(16),
-							children: [
-								_buildDataCard(
-									'Обороты двигателя',
-									'${currentData['rpm']?.toString() ?? "---"} RPM',
-									Icons.speed,
-								),
-								_buildDataCard(
-									'Скорость',
-									'${currentData['speed']?.toString() ?? "---"} км/ч',
-									Icons.directions_car,
-								),
-								_buildDataCard(
-									'Дроссель',
-									'${currentData['throttle']?.toStringAsFixed(1) ?? "---"}%',
-									Icons.timeline,
-								),
-								_buildDataCard(
-									'Температура ОЖ',
-									'${currentData['temp']?.toString() ?? "---"}°C',
-									Icons.thermostat,
-								),
-							],
-						) : Center(
+			body: CustomScrollView(
+				slivers: [
+					SliverToBoxAdapter(
+						child: Padding(
+							padding: const EdgeInsets.all(16),
 							child: Column(
-								mainAxisAlignment: MainAxisAlignment.center,
+								crossAxisAlignment: CrossAxisAlignment.start,
 								children: [
-									Icon(
-										Icons.car_repair,
-										size: 64,
-										color: Colors.grey,
-									),
-									SizedBox(height: 16),
-									Text(
-										'Подключитесь к OBD для просмотра данных',
-										style: TextStyle(
-											fontSize: 16,
-											color: Colors.grey,
-										),
-									),
+									_buildConnectionCard(context),
+									const SizedBox(height: 24),
+									_buildMenuGrid(context),
 								],
 							),
 						),
@@ -182,47 +113,199 @@ class _ObdScreenState extends State<ObdScreen> {
 		);
 	}
 
-	Widget _buildDataCard(String title, String value, IconData icon) {
-		return Card(
-			margin: EdgeInsets.only(bottom: 8),
-			elevation: 2,
-			child: Padding(
-				padding: EdgeInsets.all(16),
-				child: Row(
-					children: [
-						Container(
-							padding: EdgeInsets.all(8),
-							decoration: BoxDecoration(
-								color: Colors.blue[50],
-								borderRadius: BorderRadius.circular(8),
-							),
-							child: Icon(icon, size: 32, color: Colors.blue),
-						),
-						SizedBox(width: 16),
-						Expanded(
-							child: Column(
+	Widget _buildConnectionCard(BuildContext context) {
+		return Container(
+			padding: const EdgeInsets.all(20),
+			decoration: BoxDecoration(
+				gradient: LinearGradient(
+					colors: [
+						Theme.of(context).colorScheme.primaryContainer,
+						Theme.of(context).colorScheme.secondaryContainer,
+					],
+					begin: Alignment.topLeft,
+					end: Alignment.bottomRight,
+				),
+				borderRadius: BorderRadius.circular(20),
+			),
+			child: Column(
+				children: [
+					Row(
+						mainAxisAlignment: MainAxisAlignment.spaceBetween,
+						children: [
+							Column(
 								crossAxisAlignment: CrossAxisAlignment.start,
 								children: [
 									Text(
-										title,
-										style: TextStyle(
-											fontSize: 14,
-											color: Colors.grey[600],
-										),
-									),
-									SizedBox(height: 4),
-									Text(
-										value,
-										style: TextStyle(
+										isConnected ? 'Подключено' : 'Отключено',
+										style: const TextStyle(
 											fontSize: 24,
 											fontWeight: FontWeight.bold,
 										),
 									),
+									Text(
+										isConnected ? 'OBD адаптер активен' : 'Нажмите для подключения',
+										style: TextStyle(
+											fontSize: 14,
+											color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+										),
+									),
 								],
 							),
+							Icon(
+								isConnected ? Icons.link : Icons.link_off,
+								size: 48,
+								color: Theme.of(context).colorScheme.primary,
+							),
+						],
+					),
+					const SizedBox(height: 20),
+					ElevatedButton(
+						onPressed: isConnecting 
+							? null 
+							: (isConnected ? _disconnectFromObd : _connectToObd),
+						style: ElevatedButton.styleFrom(
+							backgroundColor: isConnected 
+								? Theme.of(context).colorScheme.errorContainer
+								: Theme.of(context).colorScheme.primaryContainer,
+							minimumSize: const Size(double.infinity, 45),
+							shape: RoundedRectangleBorder(
+								borderRadius: BorderRadius.circular(12),
+							),
+						),
+						child: Text(
+							isConnecting
+								? 'Подключение...'
+								: (isConnected ? 'Отключить' : 'Подключить'),
+							style: TextStyle(
+								color: isConnected 
+									? Theme.of(context).colorScheme.onErrorContainer
+									: Theme.of(context).colorScheme.onPrimaryContainer,
+							),
+						),
+					),
+				],
+			),
+		);
+	}
+
+	Widget _buildMenuGrid(BuildContext context) {
+		final menuItems = [
+			_buildMenuItem(
+				context,
+				'Диагностика',
+				'Просмотр параметров в реальном времени',
+				Icons.speed_outlined,
+				() => Navigator.push(
+					context,
+					MaterialPageRoute(
+						builder: (context) => DetailedObdScreen(data: currentData),
+					),
+				),
+			),
+			_buildMenuItem(
+				context,
+				'Ошибки',
+				'Чтение и сброс ошибок',
+				Icons.warning_outlined,
+				() {/* TODO: Реализовать */},
+			),
+			_buildMenuItem(
+				context,
+				'Датчики',
+				'Показания всех датчиков',
+				Icons.sensors_outlined,
+				() {/* TODO: Реализовать */},
+			),
+			_buildMenuItem(
+				context,
+				'Настройки',
+				'Настройка подключения',
+				Icons.settings_outlined,
+				() {/* TODO: Реализовать */},
+			),
+		];
+
+		return GridView.builder(
+			shrinkWrap: true,
+			physics: const NeverScrollableScrollPhysics(),
+			gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+				crossAxisCount: 2,
+				crossAxisSpacing: 16,
+				mainAxisSpacing: 16,
+				childAspectRatio: 1.1,
+			),
+			itemCount: menuItems.length,
+			itemBuilder: (context, index) => menuItems[index],
+		);
+	}
+
+	Widget _buildMenuItem(
+		BuildContext context,
+		String title,
+		String subtitle,
+		IconData icon,
+		VoidCallback onTap,
+	) {
+		return InkWell(
+			onTap: isConnected ? onTap : null,
+			borderRadius: BorderRadius.circular(16),
+			child: Container(
+				padding: const EdgeInsets.all(16),
+				decoration: BoxDecoration(
+					color: Theme.of(context).colorScheme.surfaceVariant,
+					borderRadius: BorderRadius.circular(16)
+				),
+				child: Column(
+					crossAxisAlignment: CrossAxisAlignment.start,
+					children: [
+						Icon(
+							icon,
+							color: isConnected 
+								? Theme.of(context).colorScheme.primary
+								: Theme.of(context).colorScheme.outline,
+							size: 32,
+						),
+						const Spacer(),
+						Text(
+							title,
+							style: TextStyle(
+								fontSize: 16,
+								fontWeight: FontWeight.bold,
+								color: isConnected 
+									? Theme.of(context).colorScheme.onSurfaceVariant
+									: Theme.of(context).colorScheme.outline,
+							),
+						),
+						const SizedBox(height: 4),
+						Text(
+							subtitle,
+							style: TextStyle(
+								fontSize: 12,
+								color: Theme.of(context).colorScheme.outline,
+							),
+							maxLines: 2,
+							overflow: TextOverflow.ellipsis,
 						),
 					],
 				),
+			),
+		);
+	}
+
+	Widget _buildConnectionIndicator() {
+		return Container(
+			width: 12,
+			height: 12,
+			decoration: BoxDecoration(
+				shape: BoxShape.circle,
+				color: isConnected ? Colors.green : Colors.red,
+				boxShadow: [
+					BoxShadow(
+						color: (isConnected ? Colors.green : Colors.red).withOpacity(0.5),
+						blurRadius: 6,
+						spreadRadius: 2,
+					),
+				],
 			),
 		);
 	}
