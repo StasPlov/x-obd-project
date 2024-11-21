@@ -1,0 +1,6 @@
+{
+  "appTitle": "x_obd_project",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}
