@@ -1,0 +1,140 @@
+import '../models/vehicle.dart';
+import 'obd_parameter_keys.dart';
+
+class InfinitiModels {
+	static final Map<String, String> defaultPids = {
+		ObdParameterKeys.rpm: '010C',
+		ObdParameterKeys.speed: '010D',
+		ObdParameterKeys.throttle: '0111',
+		ObdParameterKeys.engineLoad: '0104',
+		ObdParameterKeys.coolantTemp: '0105',
+		ObdParameterKeys.fuelLevel: '012F',
+		ObdParameterKeys.voltage: 'ATRV',
+		ObdParameterKeys.maf: '0110',
+		ObdParameterKeys.o2Voltage: '0124',
+		ObdParameterKeys.timing: '010E',
+		ObdParameterKeys.intakeTemp: '010F',
+	};
+
+	static final List<Vehicle> models = [
+	Vehicle(
+		make: 'Infiniti',
+		model: 'FX35',
+		year: '2006',
+		engine: 'VQ35DE',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'FX37',
+		year: '2012',
+		engine: 'VQ37VHR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'Q50',
+		year: '2014-2023',
+		engine: 'VR30DDTT',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'QX50',
+		year: '2019-2023',
+		engine: 'VC-Turbo',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'QX60',
+		year: '2022-2023',
+		engine: 'VR30DDTT',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'QX80',
+		year: '2011-2023',
+		engine: 'VK56VD',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'G37',
+		year: '2008-2013',
+		engine: 'VQ37VHR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'G35',
+		year: '2003-2008',
+		engine: 'VQ35DE',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'M35',
+		year: '2006-2010',
+		engine: 'VQ35DE',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'M37',
+		year: '2011-2013',
+		engine: 'VQ37VHR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'Q40',
+		year: '2014-2015',
+		engine: 'VQ37VHR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'Q60',
+		year: '2014-2023',
+		engine: 'VR30DDTT',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'Q70',
+		year: '2014-2019',
+		engine: 'VQ37VHR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'QX30',
+		year: '2017-2019',
+		engine: 'M274',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'QX70',
+		year: '2014-2017',
+		engine: 'VQ37VHR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'EX35',
+		year: '2008-2012',
+		engine: 'VQ35HR',
+		supportedPids: defaultPids,
+	),
+	Vehicle(
+		make: 'Infiniti',
+		model: 'JX35',
+		year: '2013',
+		engine: 'VQ35DE',
+		supportedPids: defaultPids,
+	),
+	];
+} 

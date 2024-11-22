@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:x_obd_project/obd/obd_commands.dart';
-
+import 'package:x_obd_project/models/vehicle.dart';
 import 'obd_data_parser.dart';
 
 class WifiObdController {
@@ -11,6 +10,11 @@ class WifiObdController {
 	final streamController = StreamController<Map<String, dynamic>>.broadcast();
 	Timer? _periodicTimer;
 	final rawDataController = StreamController<String>.broadcast();
+	Vehicle? selectedVehicle;
+
+	void setVehicle(Vehicle vehicle) {
+		selectedVehicle = vehicle;
+	}
 
 	// Получаем стрим с данными
 	Stream<Map<String, dynamic>> get dataStream => streamController.stream;
@@ -60,14 +64,10 @@ class WifiObdController {
 	void _startPeriodicUpdates() {
 		_periodicTimer?.cancel();
 		_periodicTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
-			if (isConnected) {
-				await sendCommand(ObdCommands.rpm);
-				await sendCommand(ObdCommands.speed);
-				await sendCommand(ObdCommands.throttle);
-				await sendCommand(ObdCommands.coolantTemp);
-				await sendCommand(ObdCommands.engineLoad);
-				await sendCommand(ObdCommands.fuelLevel);
-				await sendCommand(ObdCommands.voltage);
+			if (isConnected && selectedVehicle != null) {
+				for (var pid in selectedVehicle!.supportedPids.values) {
+					await sendCommand(pid);
+				}
 			}
 		});
 	}

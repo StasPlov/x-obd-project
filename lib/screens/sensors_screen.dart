@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:x_obd_project/data/obd_parameter_keys.dart';
 
 class SensorsScreen extends StatefulWidget {
 	final Map<String, dynamic> data;
@@ -70,17 +71,17 @@ class _SensorsScreenState extends State<SensorsScreen> {
 					'Двигатель',
 					Icons.directions_car_outlined,
 					[
-						_buildSensorItem(context, 'RPM', '${currentData['rpm'] ?? "0"}', 'об/мин'),
+						_buildSensorItem(context, 'RPM', '${currentData[ObdParameterKeys.rpm] ?? "0"}', 'об/мин'),
 						_buildSensorItem(
 							context,
 							'Нагрузка',
-							'${currentData['engineLoad']?.toStringAsFixed(1) ?? "0"}',
+							'${currentData[ObdParameterKeys.engineLoad]?.toStringAsFixed(1) ?? "0"}',
 							'%',
 						),
 						_buildSensorItem(
 							context,
 							'Температура',
-							'${currentData['temp'] ?? "0"}',
+							'${currentData[ObdParameterKeys.coolantTemp] ?? "0"}',
 							'°C',
 						),
 					],
@@ -94,7 +95,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
 						_buildSensorItem(
 							context,
 							'Уровень топлива',
-							'${currentData['fuelLevel']?.toStringAsFixed(1) ?? "0"}',
+							'${currentData[ObdParameterKeys.fuelLevel]?.toStringAsFixed(1) ?? "0"}',
 							'%',
 						),
 						_buildSensorItem(
@@ -114,7 +115,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
 						_buildSensorItem(
 							context,
 							'Напряжение',
-							'${currentData['voltage']?.toStringAsFixed(1) ?? "0"}',
+							'${currentData[ObdParameterKeys.voltage]?.toStringAsFixed(1) ?? "0"}',
 							'В',
 						),
 					],
