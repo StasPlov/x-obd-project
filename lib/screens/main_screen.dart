@@ -248,7 +248,9 @@ class _MainScreenState extends State<MainScreen> {
                   Text(
                     isConnected
                         ? 'OBD адаптер активен'
-                        : 'Нажмите для подключения',
+                        : selectedVehicle == null 
+                            ? 'Сначала выберите автомобиль'
+                            : 'Нажмите для подключения',
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context)
@@ -275,12 +277,15 @@ class _MainScreenState extends State<MainScreen> {
               child: const Text('Выбрать автомобиль'),
             ),
           if (selectedVehicle != null)
-            Text(
-              '${selectedVehicle!.make} ${selectedVehicle!.model} ${selectedVehicle!.year}',
-              style: const TextStyle(fontSize: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                '${selectedVehicle!.make} ${selectedVehicle!.model} ${selectedVehicle!.year}',
+                style: const TextStyle(fontSize: 16),
+              ),
             ),
           ElevatedButton(
-            onPressed: isConnecting
+            onPressed: isConnecting || selectedVehicle == null
                 ? null
                 : (isConnected ? _disconnectFromObd : _connectToObd),
             style: ElevatedButton.styleFrom(
