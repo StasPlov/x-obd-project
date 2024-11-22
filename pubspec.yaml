@@ -17,6 +17,7 @@ dependencies:
   permission_handler: ^10.0.0
   cupertino_icons: ^1.0.2
   wifi_scan: ^0.4.0
+  collection: ^1.17.0
 
 dev_dependencies:
   flutter_test:

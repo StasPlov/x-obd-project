@@ -321,12 +321,12 @@ class _MainScreenState extends State<MainScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.directions_car_outlined),
-                  const SizedBox(width: 8),
-                  const Text('Выбрать автомобиль'),
+                 	Icon(Icons.directions_car_outlined),
+                 	SizedBox(width: 8),
+                	Text('Выбрать автомобиль'),
                 ],
               ),
             ),
@@ -400,7 +400,9 @@ class _MainScreenState extends State<MainScreen> {
         () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ErrorsScreen(data: currentData),
+            builder: (context) => ErrorsScreen(
+              obdController: _obdController,
+            ),
           ),
         ),
       ),

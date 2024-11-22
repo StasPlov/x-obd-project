@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:x_obd_project/data/obd_parameter_keys.dart';
+import 'package:x_obd_project/data/obd_parameters.dart';
 
 class SensorsScreen extends StatefulWidget {
 	final Map<String, dynamic> data;
@@ -17,6 +19,7 @@ class SensorsScreen extends StatefulWidget {
 
 class _SensorsScreenState extends State<SensorsScreen> {
 	late Map<String, dynamic> currentData;
+	StreamSubscription? _subscription;
 
 	@override
 	void initState() {
@@ -26,11 +29,19 @@ class _SensorsScreenState extends State<SensorsScreen> {
 	}
 
 	void _subscribeToData() {
-		widget.dataStream.listen((data) {
-			setState(() {
-				currentData.addAll(data);
-			});
+		_subscription = widget.dataStream.listen((data) {
+			if (mounted) {
+				setState(() {
+					currentData.addAll(data);
+				});
+			}
 		});
+	}
+
+	@override
+	void dispose() {
+		_subscription?.cancel();
+		super.dispose();
 	}
 
 	@override
@@ -64,99 +75,59 @@ class _SensorsScreenState extends State<SensorsScreen> {
 	}
 
 	Widget _buildSensorGroups(BuildContext context) {
+		final engineParams = ObdParameters.getParametersByCategory(ObdParameters.categoryEngine);
+		final movementParams = ObdParameters.getParametersByCategory(ObdParameters.categoryMovement);
+		final fuelParams = ObdParameters.getParametersByCategory(ObdParameters.categoryFuel);
+		final electricalParams = ObdParameters.getParametersByCategory(ObdParameters.categoryElectrical);
+
 		return Column(
 			children: [
 				_buildSensorGroup(
 					context,
 					'Двигатель',
 					Icons.directions_car_outlined,
-					[
-						_buildSensorItem(context, 'RPM', '${currentData[ObdParameterKeys.rpm] ?? "0"}', 'об/мин'),
-						_buildSensorItem(context, 'Нагрузка', '${currentData[ObdParameterKeys.engineLoad]?.toStringAsFixed(1) ?? "0"}', '%'),
-						_buildSensorItem(context, 'Температура ОЖ', '${currentData[ObdParameterKeys.coolantTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'Температура масла', '${currentData[ObdParameterKeys.engineOilTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'Давление впуска', '${currentData[ObdParameterKeys.manifoldPressure] ?? "0"}', 'kPa'),
-						_buildSensorItem(context, 'Время работы', '${currentData[ObdParameterKeys.engineRuntime] ?? "0"}', 'сек'),
-						_buildSensorItem(context, 'Угол опережения', '${currentData[ObdParameterKeys.timing] ?? "0"}', '°'),
-						_buildSensorItem(context, 'Температура впуска', '${currentData[ObdParameterKeys.intakeTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'Крутящий момент', '${currentData[ObdParameterKeys.engineTorque] ?? "0"}', 'Нм'),
-						_buildSensorItem(context, 'Давление масла', '${currentData[ObdParameterKeys.oilPressure] ?? "0"}', 'kPa'),
-						_buildSensorItem(context, 'Ресурс масла', '${currentData[ObdParameterKeys.engineOilLife] ?? "0"}', '%'),
-						_buildSensorItem(context, 'Давление турбины', '${currentData[ObdParameterKeys.turboBoost] ?? "0"}', 'PSI'),
-					],
+					engineParams.map((param) => _buildSensorItem(
+						context,
+						param.name,
+						'${currentData[param.key] ?? "0"}',
+						param.unit,
+					)).toList(),
 				),
 				const SizedBox(height: 24),
 				_buildSensorGroup(
 					context,
 					'Движение',
 					Icons.speed_outlined,
-					[
-						_buildSensorItem(context, 'Скорость', '${currentData[ObdParameterKeys.speed] ?? "0"}', 'км/ч'),
-						_buildSensorItem(context, 'Положение дросселя', '${currentData[ObdParameterKeys.throttle]?.toStringAsFixed(1) ?? "0"}', '%'),
-						_buildSensorItem(context, 'Абсолютное положение', '${currentData[ObdParameterKeys.absThrottle]?.toStringAsFixed(1) ?? "0"}', '%'),
-						_buildSensorItem(context, 'Скорость колёс', '${currentData[ObdParameterKeys.wheelSpeed] ?? "0"}', 'км/ч'),
-						_buildSensorItem(context, 'Ускорение X', '${currentData[ObdParameterKeys.accelerationX]?.toStringAsFixed(2) ?? "0"}', 'g'),
-						_buildSensorItem(context, 'Ускорение Y', '${currentData[ObdParameterKeys.accelerationY]?.toStringAsFixed(2) ?? "0"}', 'g'),
-						_buildSensorItem(context, 'Угол руля', '${currentData[ObdParameterKeys.steeringAngle] ?? "0"}', '°'),
-					],
+					movementParams.map((param) => _buildSensorItem(
+						context,
+						param.name,
+						'${currentData[param.key] ?? "0"}',
+						param.unit,
+					)).toList(),
 				),
 				const SizedBox(height: 24),
 				_buildSensorGroup(
 					context,
 					'Топливная система',
-						Icons.local_gas_station_outlined,
-					[
-						_buildSensorItem(context, 'Уровень топлива', '${currentData[ObdParameterKeys.fuelLevel]?.toStringAsFixed(1) ?? "0"}', '%'),
-						_buildSensorItem(context, 'Расход воздуха', '${currentData[ObdParameterKeys.maf]?.toStringAsFixed(1) ?? "0"}', 'г/с'),
-						_buildSensorItem(context, 'Напряжение O2', '${currentData[ObdParameterKeys.o2Voltage]?.toStringAsFixed(2) ?? "0"}', 'В'),
-						_buildSensorItem(context, 'Давление топлива', '${currentData[ObdParameterKeys.fuelPressure] ?? "0"}', 'kPa'),
-						_buildSensorItem(context, 'Давление в рампе', '${currentData[ObdParameterKeys.fuelRailPressure] ?? "0"}', 'kPa'),
-						_buildSensorItem(context, 'Расход топлива', '${currentData[ObdParameterKeys.fuelConsumption]?.toStringAsFixed(1) ?? "0"}', 'л/100км'),
-						_buildSensorItem(context, 'Коррекция топлива', '${currentData[ObdParameterKeys.fuelTrim]?.toStringAsFixed(1) ?? "0"}', '%'),
-						_buildSensorItem(context, 'Тип топлива', '${currentData[ObdParameterKeys.fuelType] ?? "N/A"}', ''),
-						_buildSensorItem(context, 'Содержание этанола', '${currentData[ObdParameterKeys.ethanolPercent] ?? "0"}', '%'),
-						_buildSensorItem(context, 'Расход в час', '${currentData[ObdParameterKeys.fuelRate]?.toStringAsFixed(1) ?? "0"}', 'л/ч'),
-					],
+					Icons.local_gas_station_outlined,
+					fuelParams.map((param) => _buildSensorItem(
+						context,
+						param.name,
+						'${currentData[param.key] ?? "0"}',
+						param.unit,
+					)).toList(),
 				),
 				const SizedBox(height: 24),
 				_buildSensorGroup(
 					context,
 					'Электрика',
 					Icons.electric_bolt_outlined,
-					[
-						_buildSensorItem(context, 'Напряжение', '${currentData[ObdParameterKeys.voltage]?.toStringAsFixed(1) ?? "0"}', 'В'),
-						_buildSensorItem(context, 'Напряжение АКБ', '${currentData[ObdParameterKeys.batteryVoltage]?.toStringAsFixed(1) ?? "0"}', 'В'),
-						_buildSensorItem(context, 'Напряжение генератора', '${currentData[ObdParameterKeys.alternatorVoltage]?.toStringAsFixed(1) ?? "0"}', 'В'),
-						_buildSensorItem(context, 'Температура АКБ', '${currentData[ObdParameterKeys.batteryTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'Заряд АКБ', '${currentData[ObdParameterKeys.batteryCharge] ?? "0"}', '%'),
-						_buildSensorItem(context, 'Нагрузка генератора', '${currentData[ObdParameterKeys.alternatorLoad] ?? "0"}', '%'),
-					],
-				),
-				const SizedBox(height: 24),
-				_buildSensorGroup(
-					context,
-					'Трансмиссия',
-					Icons.settings_outlined,
-					[
-						_buildSensorItem(context, 'Температура АКПП', '${currentData[ObdParameterKeys.transmissionTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'Текущая передача', '${currentData[ObdParameterKeys.currentGear] ?? "N/A"}', ''),
-						_buildSensorItem(context, 'Гидротрансформатор', '${currentData[ObdParameterKeys.torqueConverter] ?? "0"}', '%'),
-						_buildSensorItem(context, 'Пробуксовка', '${currentData[ObdParameterKeys.transmissionSlip]?.toStringAsFixed(1) ?? "0"}', '%'),
-						_buildSensorItem(context, 'Положение сцепления', '${currentData[ObdParameterKeys.clutchPosition] ?? "0"}', '%'),
-					],
-				),
-				const SizedBox(height: 24),
-				_buildSensorGroup(
-					context,
-					'Выхлопная система',
-					Icons.air_outlined,
-					[
-						_buildSensorItem(context, 'Температура катализатора', '${currentData[ObdParameterKeys.catalystTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'Температура выхлопа', '${currentData[ObdParameterKeys.exhaustGasTemp] ?? "0"}', '°C'),
-						_buildSensorItem(context, 'NOx датчик', '${currentData[ObdParameterKeys.noxSensor] ?? "0"}', 'ppm'),
-						_buildSensorItem(context, 'Сажевый фильтр', '${currentData[ObdParameterKeys.particulateFilter] ?? "0"}', '%'),
-						_buildSensorItem(context, 'EGR клапан', '${currentData[ObdParameterKeys.egr] ?? "0"}', '%'),
-					],
+					electricalParams.map((param) => _buildSensorItem(
+						context,
+						param.name,
+						'${currentData[param.key] ?? "0"}',
+						param.unit,
+					)).toList(),
 				),
 			],
 		);

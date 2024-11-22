@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class RawDataScreen extends StatefulWidget {
@@ -14,7 +16,7 @@ class RawDataScreen extends StatefulWidget {
 
 class _RawDataScreenState extends State<RawDataScreen> {
   final List<String> _rawDataLines = [];
-  final ScrollController _scrollController = ScrollController();
+  StreamSubscription? _subscription;
 
   @override
   void initState() {
@@ -23,14 +25,28 @@ class _RawDataScreenState extends State<RawDataScreen> {
   }
 
   void _subscribeToData() {
-    widget.rawDataStream.listen((data) {
-      setState(() {
-        _rawDataLines.insert(0, '${DateTime.now().toString().substring(11, 23)} > $data');
-        if (_rawDataLines.length > 100) {
-          _rawDataLines.removeLast();
+    _subscription = widget.rawDataStream.listen(
+      (data) {
+        if (mounted) {
+          setState(() {
+            _rawDataLines.add(data);
+            if (_rawDataLines.length > 100) {
+              _rawDataLines.removeAt(0);
+            }
+          });
         }
-      });
-    });
+      },
+      onError: (error) {
+        print('Ошибка получения данных: $error');
+      },
+      cancelOnError: false,
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -48,9 +64,11 @@ class _RawDataScreenState extends State<RawDataScreen> {
           IconButton(
             icon: const Icon(Icons.clear_all),
             onPressed: () {
-              setState(() {
-                _rawDataLines.clear();
-              });
+              if (mounted) {
+                setState(() {
+                  _rawDataLines.clear();
+                });
+              }
             },
           ),
         ],
@@ -94,11 +112,5 @@ class _RawDataScreenState extends State<RawDataScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 } 

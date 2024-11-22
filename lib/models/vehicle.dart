@@ -3,13 +3,13 @@ class Vehicle {
   final String model;
   final String year;
   final String engine;
-  final Map<String, String> supportedPids;
+  final List<String> supportedParameterKeys;
 
-  Vehicle({
+  const Vehicle({
     required this.make,
     required this.model,
     required this.year,
     required this.engine,
-    required this.supportedPids,
+    required this.supportedParameterKeys,
   });
 } 
