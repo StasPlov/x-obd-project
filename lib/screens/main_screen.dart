@@ -82,108 +82,123 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Future<void> _showVehicleSelectionDialog(BuildContext context) async {
+  Future<Future<Object?>> _showVehicleSelectionDialog(BuildContext context) async {
     String searchQuery = '';
 
-    return showDialog<void>(
+    return showGeneralDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            var filteredModels = InfinitiModels.models.where((vehicle) {
-              return vehicle.model
-                      .toLowerCase()
-                      .contains(searchQuery.toLowerCase()) ||
-                  vehicle.year
-                      .toLowerCase()
-                      .contains(searchQuery.toLowerCase()) ||
-                  vehicle.engine
-                      .toLowerCase()
-                      .contains(searchQuery.toLowerCase());
-            }).toList();
+      barrierDismissible: true,
+      barrierLabel: 'Выбор автомобиля',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ),
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text('Выберите автомобиль'),
+            content: StatefulBuilder(
+              builder: (context, setDialogState) {
+                var filteredModels = InfinitiModels.models.where((vehicle) {
+                  return vehicle.model
+                          .toLowerCase()
+                          .contains(searchQuery.toLowerCase()) ||
+                      vehicle.year
+                          .toLowerCase()
+                          .contains(searchQuery.toLowerCase()) ||
+                      vehicle.engine
+                          .toLowerCase()
+                          .contains(searchQuery.toLowerCase());
+                }).toList();
 
-            return AlertDialog(
-              title: const Text('Выберите автомобиль'),
-              content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Поиск...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setDialogState(() {
-                          searchQuery = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Flexible(
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.5,
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: filteredModels.length,
-                          itemBuilder: (context, index) {
-                            final vehicle = filteredModels[index];
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outline
-                                      .withOpacity(0.2),
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ListTile(
-                                title: Text(
-                                  '${vehicle.model} ${vehicle.year}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  'Двигатель: ${vehicle.engine}',
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                                ),
-                                onTap: () {
-                                  _obdController.setVehicle(vehicle);
-                                  Navigator.pop(context);
-                                  setState(() {
-                                    selectedVehicle = vehicle;
-                                  });
-                                },
-                              ),
-                            );
+                return AlertDialog(
+                  title: const Text('Выберите автомобиль'),
+                  content: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Поиск...',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              searchQuery = value;
+                            });
                           },
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        Flexible(
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxHeight: MediaQuery.of(context).size.height * 0.5,
+                            ),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: filteredModels.length,
+                              itemBuilder: (context, index) {
+                                final vehicle = filteredModels[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline
+                                          .withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ListTile(
+                                    title: Text(
+                                      '${vehicle.model} ${vehicle.year}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'Двигатель: ${vehicle.engine}',
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      _obdController.setVehicle(vehicle);
+                                      Navigator.pop(context);
+                                      setState(() {
+                                        selectedVehicle = vehicle;
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Отмена'),
                     ),
                   ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Отмена'),
-                ),
-              ],
-            );
-          },
+                );
+              },
+            ),
+          ),
         );
       },
     );
@@ -230,6 +245,17 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildConnectionCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Row(
@@ -261,10 +287,22 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
               ),
-              Icon(
-                isConnected ? Icons.link : Icons.link_off,
-                size: 48,
-                color: Theme.of(context).colorScheme.primary,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isConnected 
+                      ? Colors.green.withOpacity(0.1)
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  isConnected ? Icons.link : Icons.link_off,
+                  size: 48,
+                  color: isConnected 
+                      ? Colors.green
+                      : Theme.of(context).colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -274,7 +312,23 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () async {
                 await _showVehicleSelectionDialog(context);
               },
-              child: const Text('Выбрать автомобиль'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.directions_car_outlined),
+                  const SizedBox(width: 8),
+                  const Text('Выбрать автомобиль'),
+                ],
+              ),
             ),
           if (selectedVehicle != null)
             Padding(
@@ -284,6 +338,7 @@ class _MainScreenState extends State<MainScreen> {
                 style: const TextStyle(fontSize: 16),
               ),
             ),
+          const SizedBox(height: 8),
           ElevatedButton(
             onPressed: isConnecting || selectedVehicle == null
                 ? null
@@ -292,20 +347,27 @@ class _MainScreenState extends State<MainScreen> {
               backgroundColor: isConnected
                   ? Theme.of(context).colorScheme.errorContainer
                   : Theme.of(context).colorScheme.primaryContainer,
+              foregroundColor: isConnected
+                  ? Theme.of(context).colorScheme.onErrorContainer
+                  : Theme.of(context).colorScheme.onPrimaryContainer,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 16),
               minimumSize: const Size(double.infinity, 45),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              isConnecting
-                  ? 'Подключение...'
-                  : (isConnected ? 'Отключить' : 'Подключить'),
-              style: TextStyle(
-                color: isConnected
-                    ? Theme.of(context).colorScheme.onErrorContainer
-                    : Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(isConnected ? Icons.link_off : Icons.link),
+                const SizedBox(width: 8),
+                Text(
+                  isConnecting
+                      ? 'Подключение...'
+                      : (isConnected ? 'Отключить' : 'Подключить'),
+                ),
+              ],
             ),
           ),
         ],
