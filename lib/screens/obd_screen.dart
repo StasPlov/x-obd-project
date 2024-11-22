@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../obd/wifi_obd_controller.dart'; // Предполагаемый путь к контроллеру
 import 'detailed_obd_screen.dart';
+import 'errors_screen.dart';
+import 'sensors_screen.dart';
+import 'settings_screen.dart';
+import 'tuning_screen.dart';
 
 class ObdScreen extends StatefulWidget {
 	const ObdScreen({super.key});
@@ -80,7 +84,7 @@ class _ObdScreenState extends State<ObdScreen> {
 		final colorScheme = Theme.of(context).colorScheme;
 		
 		return Scaffold(
-			backgroundColor: colorScheme.background,
+			backgroundColor: colorScheme.surface,
 			appBar: AppBar(
 				backgroundColor: Colors.transparent,
 				elevation: 0,
@@ -207,21 +211,48 @@ class _ObdScreenState extends State<ObdScreen> {
 				'Ошибки',
 				'Чтение и сброс ошибок',
 				Icons.warning_outlined,
-				() {/* TODO: Реализовать */},
+				() => Navigator.push(
+					context,
+					MaterialPageRoute(
+						builder: (context) => ErrorsScreen(data: currentData),
+					),
+				),
 			),
 			_buildMenuItem(
 				context,
 				'Датчики',
 				'Показания всех датчиков',
 				Icons.sensors_outlined,
-				() {/* TODO: Реализовать */},
+				() => Navigator.push(
+					context,
+					MaterialPageRoute(
+						builder: (context) => SensorsScreen(data: currentData),
+					),
+				),
 			),
 			_buildMenuItem(
 				context,
 				'Настройки',
 				'Настройка подключения',
 				Icons.settings_outlined,
-				() {/* TODO: Реализовать */},
+				() => Navigator.push(
+					context,
+					MaterialPageRoute(
+						builder: (context) => const SettingsScreen(),
+					),
+				),
+			),
+			_buildMenuItem(
+				context,
+				'Тюнинг',
+				'Настройка параметров двигателя',
+				Icons.tune_outlined,
+				() => Navigator.push(
+					context,
+					MaterialPageRoute(
+						builder: (context) => TuningScreen(data: currentData),
+					),
+				),
 			),
 		];
 
@@ -252,7 +283,7 @@ class _ObdScreenState extends State<ObdScreen> {
 			child: Container(
 				padding: const EdgeInsets.all(16),
 				decoration: BoxDecoration(
-					color: Theme.of(context).colorScheme.surfaceVariant,
+					color: Theme.of(context).colorScheme.surfaceContainerHighest,
 					borderRadius: BorderRadius.circular(16)
 				),
 				child: Column(
