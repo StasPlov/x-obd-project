@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../obd/wifi_obd_controller.dart'; // Предполагаемый путь к контроллеру
-import 'detailed_obd_screen.dart';
 import 'errors_screen.dart';
 import 'sensors_screen.dart';
 import 'settings_screen.dart';
@@ -196,13 +195,13 @@ class _MainScreenState extends State<MainScreen> {
 		final menuItems = [
 			_buildMenuItem(
 				context,
-				'Диагностика',
-				'Просмотр параметров в реальном времени',
-				Icons.speed_outlined,
+				'Датчики',
+				'Показания всех датчиков',
+				Icons.sensors_outlined,
 				() => Navigator.push(
 					context,
 					MaterialPageRoute(
-						builder: (context) => DetailedObdScreen(data: currentData),
+						builder: (context) => SensorsScreen(data: currentData),
 					),
 				),
 			),
@@ -220,20 +219,8 @@ class _MainScreenState extends State<MainScreen> {
 			),
 			_buildMenuItem(
 				context,
-				'Датчики',
-				'Показания всех датчиков',
-				Icons.sensors_outlined,
-				() => Navigator.push(
-					context,
-					MaterialPageRoute(
-						builder: (context) => SensorsScreen(data: currentData),
-					),
-				),
-			),
-			_buildMenuItem(
-				context,
 				'Настройки',
-				'Настройка подключения',
+				'Настройки приложения',
 				Icons.settings_outlined,
 				() => Navigator.push(
 					context,
@@ -245,8 +232,8 @@ class _MainScreenState extends State<MainScreen> {
 			_buildMenuItem(
 				context,
 				'Тюнинг',
-				'Настройка параметров двигателя',
-				Icons.tune_outlined,
+				'Настройка параметров и прошивка',
+				Icons.settings_outlined,
 				() => Navigator.push(
 					context,
 					MaterialPageRoute(
@@ -256,17 +243,13 @@ class _MainScreenState extends State<MainScreen> {
 			),
 		];
 
-		return GridView.builder(
+		return GridView.count(
 			shrinkWrap: true,
-			physics: const NeverScrollableScrollPhysics(),
-			gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-				crossAxisCount: 2,
-				crossAxisSpacing: 16,
-				mainAxisSpacing: 16,
-				childAspectRatio: 1.1,
-			),
-			itemCount: menuItems.length,
-			itemBuilder: (context, index) => menuItems[index],
+			crossAxisCount: 2,
+			mainAxisSpacing: 16,
+			crossAxisSpacing: 16,
+			childAspectRatio: 1.5,
+			children: menuItems,
 		);
 	}
 
