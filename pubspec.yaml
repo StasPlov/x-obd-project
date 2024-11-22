@@ -14,7 +14,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_bluetooth_serial: ^0.4.0
   permission_handler: ^10.0.0
   cupertino_icons: ^1.0.2
   wifi_scan: ^0.4.0

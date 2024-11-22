@@ -6,14 +6,14 @@ import 'sensors_screen.dart';
 import 'settings_screen.dart';
 import 'tuning_screen.dart';
 
-class ObdScreen extends StatefulWidget {
-	const ObdScreen({super.key});
+class MainScreen extends StatefulWidget {
+	const MainScreen({super.key});
 
 	@override
-	_ObdScreenState createState() => _ObdScreenState();
+	_MainScreenState createState() => _MainScreenState();
 }
 
-class _ObdScreenState extends State<ObdScreen> {
+class _MainScreenState extends State<MainScreen> {
 	final WifiObdController _obdController = WifiObdController();
 	bool isConnected = true;
 	bool isConnecting = true;

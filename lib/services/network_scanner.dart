@@ -45,7 +45,7 @@ class NetworkScanner {
 			final socket = await Socket.connect(
 				'192.168.0.10', // Стандартный IP для многих OBD адаптеров
 				35000,
-				timeout: Duration(seconds: 2),
+				timeout: const Duration(seconds: 2),
 			);
 			
 			socket.write('ATZ\r\n'); // Отправляем тестовую команду

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'tuning/backup_screen.dart';
+import 'tuning/parameters_comparison_screen.dart';
+import 'tuning/post_tuning_diagnostics_screen.dart';
+import 'tuning/saved_configs_screen.dart';
+import 'tuning/tuning_history_screen.dart';
 
 class TuningScreen extends StatelessWidget {
 	final Map<String, dynamic> data;
@@ -83,21 +88,49 @@ class TuningScreen extends StatelessWidget {
 			children: [
 				_buildTuningGroup(
 					context,
+					'Конфигурации',
+					Icons.save_outlined,
+					[
+						_buildTuningItem(
+							context,
+							'Сохраненные конфигурации',
+							'Управление настройками',
+							() => Navigator.push(
+								context,
+								MaterialPageRoute(
+									builder: (context) => const SavedConfigsScreen(),
+								),
+							),
+						),
+						_buildTuningItem(
+							context,
+							'История изменений',
+							'Просмотр внесенных изменений',
+							() => Navigator.push(
+								context,
+								MaterialPageRoute(
+									builder: (context) => const TuningHistoryScreen(),
+								),
+							),
+						),
+					],
+				),
+				const SizedBox(height: 24),
+				_buildTuningGroup(
+					context,
 					'Двигатель',
 					Icons.directions_car_outlined,
 					[
-						_buildTuningOption(
+						_buildTuningItem(
 							context,
-							'Прошивка дросселя',
-							'Настройка отклика педали газа',
-							Icons.speed,
+							'Настройка дросселя',
+							'Изменение отклика педали газа',
 							() => _showTuningDialog(context, 'throttle'),
 						),
-						_buildTuningOption(
+						_buildTuningItem(
 							context,
 							'Ограничитель оборотов',
 							'Настройка максимальных оборотов',
-							Icons.trending_up,
 							() => _showTuningDialog(context, 'rpm_limit'),
 						),
 					],
@@ -105,37 +138,52 @@ class TuningScreen extends StatelessWidget {
 				const SizedBox(height: 24),
 				_buildTuningGroup(
 					context,
-					'Топливная система',
-					Icons.local_gas_station_outlined,
+					'Диагностика',
+					Icons.analytics_outlined,
 					[
-						_buildTuningOption(
+						_buildTuningItem(
 							context,
-							'Состав смеси',
-							'Настройка богатства смеси',
-							Icons.opacity,
-							() => _showTuningDialog(context, 'fuel_mixture'),
+							'Проверка после прошивки',
+							'Диагностика параметров',
+							() => Navigator.push(
+								context,
+								MaterialPageRoute(
+									builder: (context) => PostTuningDiagnosticsScreen(data: data),
+								),
+							),
 						),
-						_buildTuningOption(
+						_buildTuningItem(
 							context,
-							'Давление турбины',
-							'Настройка давления наддува',
-							Icons.compress,
-							() => _showTuningDialog(context, 'boost_pressure'),
+							'Сравнение параметров',
+							'До и после изменений',
+							() => Navigator.push(
+								context,
+								MaterialPageRoute(
+									builder: (context) => ParametersComparisonScreen(
+										beforeData: data,
+										afterData: data, // TODO: Добавить реальные данные после
+									),
+								),
+							),
 						),
 					],
 				),
 				const SizedBox(height: 24),
 				_buildTuningGroup(
 					context,
-					'Трансмиссия',
-					Icons.settings_outlined,
+					'Резервное копирование',
+					Icons.backup_outlined,
 					[
-						_buildTuningOption(
+						_buildTuningItem(
 							context,
-							'Точки переключения',
-							'Настройка моментов переключения передач',
-							Icons.swap_vert,
-							() => _showTuningDialog(context, 'shift_points'),
+							'Управление backup\'ами',
+							'Сохранение и восстановление',
+							() => Navigator.push(
+								context,
+								MaterialPageRoute(
+									builder: (context) => const BackupScreen(),
+								),
+							),
 						),
 					],
 				),
@@ -182,11 +230,10 @@ class TuningScreen extends StatelessWidget {
 		);
 	}
 
-	Widget _buildTuningOption(
+	Widget _buildTuningItem(
 		BuildContext context,
 		String title,
 		String subtitle,
-		IconData icon,
 		VoidCallback onTap,
 	) {
 		return InkWell(
@@ -203,8 +250,8 @@ class TuningScreen extends StatelessWidget {
 				child: Row(
 					children: [
 						Icon(
-							icon,
-							color: Theme.of(context).colorScheme.primary,
+							Icons.chevron_right,
+							color: Theme.of(context).colorScheme.outline,
 						),
 						const SizedBox(width: 16),
 						Expanded(
@@ -227,10 +274,6 @@ class TuningScreen extends StatelessWidget {
 									),
 								],
 							),
-						),
-						Icon(
-							Icons.chevron_right,
-							color: Theme.of(context).colorScheme.outline,
 						),
 					],
 				),
