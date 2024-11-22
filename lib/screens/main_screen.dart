@@ -4,6 +4,7 @@ import 'errors_screen.dart';
 import 'sensors_screen.dart';
 import 'settings_screen.dart';
 import 'tuning_screen.dart';
+import 'raw_data_screen.dart';
 
 class MainScreen extends StatefulWidget {
 	const MainScreen({super.key});
@@ -14,8 +15,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 	final WifiObdController _obdController = WifiObdController();
-	bool isConnected = true;
-	bool isConnecting = true;
+	bool isConnected = false;
+	bool isConnecting = false;
 	Map<String, dynamic> currentData = {};
 
 	@override
@@ -238,6 +239,20 @@ class _MainScreenState extends State<MainScreen> {
 					context,
 					MaterialPageRoute(
 						builder: (context) => TuningScreen(data: currentData),
+					),
+				),
+			),
+			_buildMenuItem(
+				context,
+				'Сырые данные',
+				'Просмотр необработанных данных OBD',
+				Icons.code,
+				() => Navigator.push(
+					context,
+					MaterialPageRoute(
+						builder: (context) => RawDataScreen(
+							rawDataStream: _obdController.rawDataStream,
+						),
 					),
 				),
 			),

@@ -10,9 +10,11 @@ class WifiObdController {
 	bool isConnected = false;
 	final streamController = StreamController<Map<String, dynamic>>.broadcast();
 	Timer? _periodicTimer;
+	final rawDataController = StreamController<String>.broadcast();
 
 	// Получаем стрим с данными
 	Stream<Map<String, dynamic>> get dataStream => streamController.stream;
+	Stream<String> get rawDataStream => rawDataController.stream;
 
 	Future<void> connect() async {
 		try {
@@ -28,15 +30,15 @@ class WifiObdController {
 
 			// Слушаем ответы от устройства
 			socket!.listen(
-			_processResponse,
-			onError: (error) {
-				print('Ошибка соединения: $error');
-				disconnect();
-			},
-			onDone: () {
-				print('Соединение закрыто');
-				disconnect();
-			},
+				_processResponse,
+				onError: (error) {
+					print('Ошибка соединения: $error');
+					disconnect();
+				},
+				onDone: () {
+					print('Соединение закрыто');
+					disconnect();
+				},
 			);
 		} catch (e) {
 			print('Ошибка подключения: $e');
@@ -79,6 +81,10 @@ class WifiObdController {
 
 	void _processResponse(Uint8List data) {
 		String response = String.fromCharCodes(data).trim();
+		
+		// Отправляем сырые данные в стрим
+		rawDataController.add(response);
+		
 		Map<String, dynamic> parsedData = {};
 
 		if (response.startsWith('41')) {
@@ -112,7 +118,8 @@ class WifiObdController {
 	}
 
 	void dispose() {
-			disconnect();
-			streamController.close();
+		disconnect();
+		streamController.close();
+		rawDataController.close();
 	}
 }
