@@ -3,6 +3,7 @@ import 'package:x_obd_project/models/dtc_error.dart';
 import 'package:x_obd_project/obd/obd_commands.dart';
 import 'package:x_obd_project/obd/wifi_obd_controller.dart';
 import 'package:collection/collection.dart';
+import 'dart:async';
 
 class ErrorsScreen extends StatefulWidget {
 	final WifiObdController obdController;
@@ -19,49 +20,51 @@ class ErrorsScreen extends StatefulWidget {
 class _ErrorsScreenState extends State<ErrorsScreen> {
 	bool isScanning = false;
 	List<DtcError> errors = [];
+	late Completer<String> _responseCompleter = Completer<String>();
+	late StreamSubscription _responseSubscription;
 
-	Future<void> _scanForErrors() async {
-		setState(() {
-			isScanning = true;
-			errors.clear();
-		});
-
-		try {
-			// Чтение активных ошибок
-			final activeErrors = await _readDtcErrors(false);
-			// Чтение отложенных ошибок
-			final pendingErrors = await _readDtcErrors(true);
-			
-			setState(() {
-				errors = [...activeErrors, ...pendingErrors];
-			});
-
-			if (errors.isEmpty) {
-				_showSnackBar('Ошибок не обнаружено', Colors.green);
+	@override
+	void initState() {
+		super.initState();
+		_responseSubscription = widget.obdController.rawDataStream.listen((response) {
+			if (!_responseCompleter.isCompleted) {
+				_responseCompleter.complete(response);
 			}
-		} catch (e) {
-			_showSnackBar('Ошибка при сканировании: $e', Colors.red);
-		} finally {
-			setState(() {
-				isScanning = false;
-			});
-		}
+		});
+	}
+
+	@override
+	void dispose() {
+		_responseSubscription.cancel();
+		super.dispose();
+	}
+
+	Future<String> _sendCommandAndWaitResponse(String command) async {
+		final completer = Completer<String>();
+		_responseCompleter = completer;
+		
+		await widget.obdController.sendCommand(command);
+		return completer.future.timeout(
+			const Duration(seconds: 3),
+			onTimeout: () => throw TimeoutException('Нет ответа от устройства'),
+		);
 	}
 
 	Future<List<DtcError>> _readDtcErrors(bool pending) async {
 		try {
 			final command = pending ? ObdCommands.readPendingDtc : ObdCommands.readDtc;
-			final response = await widget.obdController.sendCommand(command);
-			return widget.obdController.parseDtcResponse('123');
+			final response = await _sendCommandAndWaitResponse(command);
+			final errors = (await widget.obdController.parseDtcResponse(response));
+			return errors;
 		} catch (e) {
 			print('Ошибка чтения DTC: $e');
-			return <DtcError>[];
+			return [];
 		}
 	}
 
 	Future<void> _clearErrors() async {
 		try {
-			await widget.obdController.sendCommand(ObdCommands.clearDtc);
+			await _sendCommandAndWaitResponse(ObdCommands.clearDtc);
 			setState(() {
 				errors.clear();
 			});
@@ -78,6 +81,17 @@ class _ErrorsScreenState extends State<ErrorsScreen> {
 				backgroundColor: color,
 			),
 		);
+	}
+
+	Future<void> _scanForErrors() async {
+		setState(() => isScanning = true);
+		try {
+			final activeErrors = await _readDtcErrors(false);
+			final pendingErrors = await _readDtcErrors(true);
+			setState(() => errors = [...activeErrors, ...pendingErrors]);
+		} finally {
+			setState(() => isScanning = false);
+		}
 	}
 
 	@override

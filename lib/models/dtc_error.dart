@@ -12,4 +12,6 @@ class DtcError {
     required this.system,
     this.isPending = false,
   });
+
+  copyWith({required bool isPending}) {}
 } 
