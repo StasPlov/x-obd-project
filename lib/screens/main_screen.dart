@@ -202,7 +202,10 @@ class _MainScreenState extends State<MainScreen> {
 				() => Navigator.push(
 					context,
 					MaterialPageRoute(
-						builder: (context) => SensorsScreen(data: currentData),
+						builder: (context) => SensorsScreen(
+							data: currentData,
+							dataStream: _obdController.dataStream,
+						),
 					),
 				),
 			),

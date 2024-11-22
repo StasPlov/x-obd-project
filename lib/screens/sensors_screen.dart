@@ -1,9 +1,36 @@
 import 'package:flutter/material.dart';
 
-class SensorsScreen extends StatelessWidget {
+class SensorsScreen extends StatefulWidget {
 	final Map<String, dynamic> data;
+	final Stream<Map<String, dynamic>> dataStream;
 
-	const SensorsScreen({super.key, required this.data});
+	const SensorsScreen({
+		super.key,
+		required this.data,
+		required this.dataStream,
+	});
+
+	@override
+	State<SensorsScreen> createState() => _SensorsScreenState();
+}
+
+class _SensorsScreenState extends State<SensorsScreen> {
+	late Map<String, dynamic> currentData;
+
+	@override
+	void initState() {
+		super.initState();
+		currentData = Map.from(widget.data);
+		_subscribeToData();
+	}
+
+	void _subscribeToData() {
+		widget.dataStream.listen((data) {
+			setState(() {
+				currentData.addAll(data);
+			});
+		});
+	}
 
 	@override
 	Widget build(BuildContext context) {
@@ -43,17 +70,17 @@ class SensorsScreen extends StatelessWidget {
 					'Двигатель',
 					Icons.directions_car_outlined,
 					[
-						_buildSensorItem(context, 'RPM', '${data['rpm'] ?? "0"}', 'об/мин'),
+						_buildSensorItem(context, 'RPM', '${currentData['rpm'] ?? "0"}', 'об/мин'),
 						_buildSensorItem(
 							context,
 							'Нагрузка',
-							'${data['engineLoad']?.toStringAsFixed(1) ?? "0"}',
+							'${currentData['engineLoad']?.toStringAsFixed(1) ?? "0"}',
 							'%',
 						),
 						_buildSensorItem(
 							context,
 							'Температура',
-							'${data['temp'] ?? "0"}',
+							'${currentData['temp'] ?? "0"}',
 							'°C',
 						),
 					],
@@ -67,7 +94,7 @@ class SensorsScreen extends StatelessWidget {
 						_buildSensorItem(
 							context,
 							'Уровень топлива',
-							'${data['fuelLevel']?.toStringAsFixed(1) ?? "0"}',
+							'${currentData['fuelLevel']?.toStringAsFixed(1) ?? "0"}',
 							'%',
 						),
 						_buildSensorItem(
@@ -87,7 +114,7 @@ class SensorsScreen extends StatelessWidget {
 						_buildSensorItem(
 							context,
 							'Напряжение',
-							'${data['voltage']?.toStringAsFixed(1) ?? "0"}',
+							'${currentData['voltage']?.toStringAsFixed(1) ?? "0"}',
 							'В',
 						),
 					],
