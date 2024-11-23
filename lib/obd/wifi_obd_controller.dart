@@ -101,7 +101,16 @@ class WifiObdController {
 
 	void onData(Uint8List data) {
 		try {
-			String response = String.fromCharCodes(data);
+			String response = String.fromCharCodes(data)
+				.trim()
+				.replaceAll('\r', '')
+				.replaceAll('?>', '')
+				.replaceAll('>', ' ')
+				.trim()
+				.replaceAll('STOPPED', '')
+				.replaceAll('NO DATA', '')
+				.trim();
+
 			print('Сырой ответ OBD: $response');
 			
 			rawDataController.add(response);
