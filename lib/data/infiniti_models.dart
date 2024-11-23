@@ -3,11 +3,11 @@ import '../models/vehicle.dart';
 class InfinitiModels {
 	// Списки поддерживаемых параметров для разных двигателей
 	static const List<String> vq35deParameters = [
+		'coolantTemp',
 		'rpm',
 		'speed',
 		'throttle',
 		'engineLoad',
-		'coolantTemp',
 		'maf',
 		'o2Voltage',
 		'engineOilTemp',
