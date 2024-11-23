@@ -23,13 +23,10 @@ class WifiObdController {
 
 	Future<void> connect() async {
 		try {
-			socket = await Socket.connect(
-				'192.168.0.10', 
-				35000,
-				timeout: const Duration(seconds: 30)
-			);
+			socket = await Socket.connect('192.168.0.10', 35000,
+					timeout: const Duration(seconds: 30));
 			isConnected = true;
-			
+
 			await initializeObd();
 			startPeriodicUpdates();
 
@@ -63,12 +60,16 @@ class WifiObdController {
 
 	void startPeriodicUpdates() {
 		periodicTimer?.cancel();
-		periodicTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
+		periodicTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) async {
 			if (isConnected && selectedVehicle != null) {
-				for (var paramKey in selectedVehicle!.supportedParameterKeys) {
+				// Создаем копию списка параметров, чтобы избежать проблем с асинхронностью
+				final parameters = List<String>.from(selectedVehicle!.supportedParameterKeys);
+				
+				for (var paramKey in parameters) {
 					final param = ObdParameters.parameters[paramKey];
 					if (param != null) {
 						await sendCommand(param.pid);
+						await Future.delayed(const Duration(milliseconds: 5));
 					}
 				}
 			}
@@ -81,7 +82,7 @@ class WifiObdController {
 		socket = null;
 		isConnected = false;
 	}
-	
+
 	void dispose() {
 		disconnect();
 		streamController.close();
@@ -97,34 +98,32 @@ class WifiObdController {
 		print('Соединение закрыто');
 		disconnect();
 	}
-	
+
 	void onData(Uint8List data) {
-		// Удаляем число 13 из data
-		//final filteredData = Uint8List.fromList(data.where((element) => element != 13 && element != 62).toList());
+		try {
+			String response = String.fromCharCodes(data);
+			print('Сырой ответ OBD: $response');
+			
+			rawDataController.add(response);
+			Map<String, dynamic> parsedData = {};
 
-		// Преобразуем байты в строку и очищаем от спецсимволов
-		String response = String.fromCharCodes(data).trim()
-			.replaceAll('\r', '')
-			.replaceAll('?>', '')
-			.replaceAll('>', '')
-			.trim();
-
-		print('Raw OBD Response: $response'); // Добавляем логирование
-
-		rawDataController.add(response);
-		Map<String, dynamic> parsedData = {};
-
-		for (var param in ObdParameters.parameters.values) {
-			final value = param.parser(response);
-
-			if (value != null) {
-				parsedData[param.key] = value;
-				print('Parsed ${param.key}: $value'); // Добавляем логирование параметров
+			for (var param in ObdParameters.parameters.values) {
+				try {
+					final value = param.parser(response);
+					if (value != null) {
+						parsedData[param.key] = value;
+						print('Разобрано ${param.key}: $value');
+					}
+				} catch (e) {
+					print('Ошибка парсинга ${param.key}: $e');
+				}
 			}
-		}
 
-		if (parsedData.isNotEmpty) {
-			streamController.add(parsedData);
+			if (parsedData.isNotEmpty) {
+				streamController.add(parsedData);
+			}
+		} catch (e) {
+			print('Общая ошибка обработки данных: $e');
 		}
 	}
 
