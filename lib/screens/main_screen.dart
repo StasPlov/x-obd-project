@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:x_obd_project/data/infiniti_models.dart';
+import 'package:x_obd_project/screens/errors_screen.dart';
 import '../obd/wifi_obd_controller.dart'; // Предполагаемый путь к контроллеру
-import 'errors_screen.dart';
 import 'sensors_screen.dart';
 import 'settings_screen.dart';
 import 'tuning_screen.dart';
@@ -392,11 +392,11 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
       ),
-      _buildMenuItem(
+	  _buildMenuItem(
         context,
         'Ошибки',
-        'Чтение и сброс ошибок',
-        Icons.warning_outlined,
+        'Просмотр и сброс ошибок',
+        Icons.sensors_outlined,
         () => Navigator.push(
           context,
           MaterialPageRoute(

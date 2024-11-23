@@ -227,25 +227,6 @@ class ObdParameters {
 			},
 		),
 
-		'wheelSpeed': ObdParameter(
-			key: 'wheelSpeed',
-			pid: '0144',
-			name: 'Скорость колёс',
-			unit: 'км/ч',
-			category: categoryMovement,
-			parser: (String response) {
-				if (response.startsWith('41 44')) {
-					var bytes = response.substring(6).trim().split(' ');
-					if (bytes.length >= 2) {
-						int a = int.parse(bytes[0], radix: 16);
-						int b = int.parse(bytes[1], radix: 16);
-						return ((a * 256) + b) / 100;
-					}
-				}
-				return null;
-			},
-		),
-
 		'o2Voltage': ObdParameter(
 			key: 'o2Voltage',
 			pid: '0124',

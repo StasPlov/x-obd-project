@@ -7,7 +7,6 @@ class InfinitiModels {
 		'speed',
 		'coolantTemp',
 		'engineLoad',
-		'throttle',
 		'shortFuelTrim1',
 		'shortFuelTrim2',
 		'longFuelTrim1',
@@ -19,23 +18,27 @@ class InfinitiModels {
 		'oxygenSensor1',
 		'batteryVoltage',
 		'distanceMIL',
-	];
-
-	// Параметры для атмосферных двигателей (VQ)
-	static const List<String> vqParameters = [
-		...baseParameters,
 		'engineOilTemp',
 		'fuelPressure',
 		'evapPurge',
 		'commandedEGR',
 		'obdStandards',
+		'turboBoost',
+		'fuelRailPressure',
+		'o2Voltage',
+		'engineRuntime',
+		'ambientTemp',
+		'fuelLevel',
+	];
+
+	// Параметры для атмосферных двигателей (VQ)
+	static const List<String> vqParameters = [
+		...baseParameters,
 	];
 
 	// Параметры для турбированных двигателей (VR)
 	static const List<String> vrParameters = [
 		...vqParameters,
-		'turboBoost',
-		'fuelRailPressure',
 	];
 
 	// Обновляем списки параметров для конкретных двигателей
@@ -45,7 +48,6 @@ class InfinitiModels {
 
 	static const List<String> vq37vhrParameters = [
 		...vqParameters,
-		'wheelSpeed',
 	];
 
 	static const List<String> vr30ddttParameters = [

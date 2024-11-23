@@ -150,11 +150,16 @@ class WifiObdController {
 	Future<List<DtcError>> parseDtcResponse(String response) async {
 		List<DtcError> errors = [];
 
+		// Проверяем специальный ответ "43 00", означающий отсутствие ошибок
+		if (response.trim() == '43 00') {
+			return errors; // Возвращаем пустой список, так как ошибок нет
+		}
+
 		if (response.isEmpty || response == 'NO DATA' || response == 'ERROR') {
 			return errors;
 		}
 
-		// Удаляем пробелы и разбиваем на пары символов
+		// Остальная логика парсинга остается без изменений
 		final cleanResponse = response.replaceAll(' ', '');
 		final pairs = RegExp(r'.{4}')
 				.allMatches(cleanResponse)
@@ -162,7 +167,7 @@ class WifiObdController {
 				.toList();
 
 		for (var code in pairs) {
-			if (code == '0000') continue; // Пропускаем пустые коды
+			if (code == '0000') continue;
 
 			final firstChar = code[0];
 			final system = DtcCodes.systems[firstChar]?.name ?? 'Неизвестная система';
@@ -173,7 +178,7 @@ class WifiObdController {
 				description: DtcCodes.getDescription(fullCode),
 				severity: DtcCodes.getSeverity(fullCode),
 				system: system,
-				isPending: false, // Для отложенных ошибок установите true
+				isPending: false,
 			));
 		}
 
