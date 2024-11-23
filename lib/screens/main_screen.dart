@@ -387,7 +387,7 @@ class _MainScreenState extends State<MainScreen> {
           MaterialPageRoute(
             builder: (context) => SensorsScreen(
               data: currentData,
-              dataStream: _obdController.dataStream,
+              obdController: _obdController,
             ),
           ),
         ),

@@ -1,16 +1,15 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:x_obd_project/data/obd_parameters.dart';
+import 'package:x_obd_project/obd/wifi_obd_controller.dart';
 
 class SensorsScreen extends StatefulWidget {
 	final Map<String, dynamic> data;
-	final Stream<Map<String, dynamic>> dataStream;
+	final WifiObdController obdController;
 
 	const SensorsScreen({
 		super.key,
 		required this.data,
-		required this.dataStream,
+		required this.obdController,
 	});
 
 	@override
@@ -19,17 +18,17 @@ class SensorsScreen extends StatefulWidget {
 
 class _SensorsScreenState extends State<SensorsScreen> {
 	late Map<String, dynamic> currentData;
-	StreamSubscription? _subscription;
 
 	@override
 	void initState() {
 		super.initState();
 		currentData = Map.from(widget.data);
 		_subscribeToData();
+		widget.obdController.startPeriodicUpdates(); // Запускаем обновления
 	}
 
 	void _subscribeToData() {
-		_subscription = widget.dataStream.listen((data) {
+		widget.obdController.dataStream.listen((data) {
 			if (mounted) {
 				setState(() {
 					currentData.addAll(data);
@@ -40,7 +39,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
 
 	@override
 	void dispose() {
-		_subscription?.cancel();
+		widget.obdController.stopPeriodicUpdates(); // Останавливаем обновления
 		super.dispose();
 	}
 

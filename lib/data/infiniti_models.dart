@@ -1,35 +1,55 @@
 import '../models/vehicle.dart';
 
 class InfinitiModels {
-	// Списки поддерживаемых параметров для разных двигателей
-	static const List<String> vq35deParameters = [
-		'coolantTemp',
+	// Базовые параметры, поддерживаемые всеми двигателями
+	static const List<String> baseParameters = [
 		'rpm',
 		'speed',
-		'throttle',
+		'coolantTemp',
 		'engineLoad',
-		'maf',
-		'o2Voltage',
-		'engineOilTemp',
-		'engineRuntime',
-		'fuelPressure',
+		'throttle',
+		'shortFuelTrim1',
+		'shortFuelTrim2',
+		'longFuelTrim1',
+		'longFuelTrim2',
+		'manifoldPressure',
+		'timingAdvance',
 		'intakeTemp',
-		'fuelLevel',
+		'airFlowRate',
+		'oxygenSensor1',
 		'batteryVoltage',
-		'ambientTemp',
+		'distanceMIL',
+	];
+
+	// Параметры для атмосферных двигателей (VQ)
+	static const List<String> vqParameters = [
+		...baseParameters,
+		'engineOilTemp',
+		'fuelPressure',
+		'evapPurge',
+		'commandedEGR',
+		'obdStandards',
+	];
+
+	// Параметры для турбированных двигателей (VR)
+	static const List<String> vrParameters = [
+		...vqParameters,
+		'turboBoost',
+		'fuelRailPressure',
+	];
+
+	// Обновляем списки параметров для конкретных двигателей
+	static const List<String> vq35deParameters = [
+		...vqParameters,
 	];
 
 	static const List<String> vq37vhrParameters = [
-		...vq35deParameters,
-		'timing',
+		...vqParameters,
 		'wheelSpeed',
-		'throttle',
-		'engineOilTemp',
 	];
 
 	static const List<String> vr30ddttParameters = [
-		...vq37vhrParameters,
-		'turboBoost',
+		...vrParameters,
 	];
 
 	static final List<Vehicle> models = [

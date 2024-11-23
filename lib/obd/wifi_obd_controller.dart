@@ -28,7 +28,6 @@ class WifiObdController {
 			isConnected = true;
 
 			await initializeObd();
-			startPeriodicUpdates();
 
 			// Подключаемся к сокету
 			socket!.listen(
@@ -74,6 +73,11 @@ class WifiObdController {
 				}
 			}
 		});
+	}
+
+	void stopPeriodicUpdates() {
+		periodicTimer?.cancel();
+		periodicTimer = null;
 	}
 
 	void disconnect() {
